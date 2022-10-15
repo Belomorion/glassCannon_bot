@@ -4,67 +4,66 @@ const cheerio =  require('cheerio')
 const axios = require('axios')
 
 const token = '5320021828:AAEofWZgbNVZsOXD68BbUvtFKkFPAW3obiE'
-
-const parse = async () => {
-    const getHTML = async (url) => {
-        const { data } = await axios.get(url)
-        return cheerio.load(data)
-    }
-
-    const $ = await getHTML('https://glasscannon.ru/')
-    console.log($.html())
-}
-
-
+const channelID = '-1001693424827'
+const adminID = '386466433'
+let arrOld = ['159','159','159']
+let arrNew = []
+let arr = []
 
 
 const bot = new TelegramApi(token, {polling: true})
 
 bot.on('message',  msg => {
     const text = msg.text
-    const chatId = msg.chat.id
+    const chatID = msg.chat.id
 
-    if (text === '/last') {
+    if (text === '/last' && chatID == adminID) {
     const parse = async () => {
         const getHTML = async (url) => {
             const {data} = await axios.get(url)
             return cheerio.load(data)
         }
         const $ = await getHTML('https://glasscannon.ru/')
-        // console.log($.html())
-
+        arr = [$('div.articleTitle').eq(0).text(), $('div.contentExcerpt').eq(0).text(), $('a', '.articleTitle').eq(0).attr('href')]
         const check1Title = $('div.articleTitle').eq(0).text()
         const check1Content = $('div.contentExcerpt').eq(0).text()
         const ref = $('a', '.articleTitle').eq(0).attr('href')
-
-        bot.sendMessage(chatId, check1Title + check1Content + ref)
+        console.log(msg)
+        console.log($('div.articleTitle').eq(0).text().replace(/[\n\t]+/g,"") + $('div.contentExcerpt').eq(0).text().replace(/[\n\t]+/g,"") + $('a', '.articleTitle').eq(0).attr('href'))
+        bot.sendMessage(chatID, $('div.articleTitle').eq(0).text().replace(/[\t]+/g,"") + $('div.contentExcerpt').eq(0).text().replace(/[\t]+/g,"") + $('a', '.articleTitle').eq(0).attr('href').replace(/[\t]+/g,""))
     }
     return parse()
-} if (text === '/check') {
-        const parse = async () => {
+}
+})
+
+
+bot.on('message',  msg => {
+    const text = msg.text
+    const chatID = msg.chat.id
+    if (text === '/looking' && chatID == adminID) {
+        const parse1 = async () => {
             const getHTML = async (url) => {
-                const {data} = await axios.get(url)
+                const { data } = await axios.get(url)
                 return cheerio.load(data)
             }
             const $ = await getHTML('https://glasscannon.ru/')
-            // console.log($.html())
-
-            const check1Title = $('div.articleTitle').eq(0).text()
-            const check1Content = $('div.contentExcerpt').eq(0).text()
-            const ref1 = $('a', '.articleTitle').eq(0).attr('href')
-            const check2Title = $('div.articleTitle').eq(1).text()
-            const check2Content = $('div.contentExcerpt').eq(1).text()
-            const ref2 = $('a', '.articleTitle').eq(1).attr('href')
-            const check3Title = $('div.articleTitle').eq(2).text()
-            const check3Content = $('div.contentExcerpt').eq(2).text()
-            const ref3 = $('a', '.articleTitle').eq(2).attr('href')
-
-            bot.sendMessage(chatId, check3Title + check3Content + ref3)
-            bot.sendMessage(chatId, check2Title + check2Content + ref2)
-            bot.sendMessage(chatId, check1Title + check1Content + ref1)
+            console.log($.html())
+            arrNew = [$('div.articleTitle').eq(0).text(), $('div.contentExcerpt').eq(0).text(), $('a', '.articleTitle').eq(0).attr('href')]
+            setTimeout(checkAndSendNew, 10000)
         }
-        return parse()
+        const checkAndSendNew = () => {
+            if (arrOld[0] !== arrNew[0] && arrOld[1] !== arrNew[1] && arrOld[2] !== arrNew[2] && arrOld !== []) {
+                bot.sendMessage(channelID, arrNew[0].replace(/[\t]+/g,"") + arrNew[1].replace(/[\t]+/g,"") + arrNew[2].replace(/[\t]+/g,""))
+                arrOld = []
+                arrOld = [arrNew[0],arrNew[1],arrNew[2]]
+             setTimeout(parse1, 10000)
+            } else if (arrOld === []) {
+                arrOld = []
+                arrOld = [arrNew[0],arrNew[1],arrNew[2]]
+            } else {
+                setTimeout(parse1, 10000)
+            }
+        }
+        return parse1()
     }
-
 })
-

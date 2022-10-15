@@ -6,7 +6,7 @@ const axios = require('axios')
 const token = '5320021828:AAEofWZgbNVZsOXD68BbUvtFKkFPAW3obiE'
 const channelID = '-1001693424827'
 const adminID = '386466433'
-let arrOld = []
+let arrOld = ['159', '159', '159']
 let arrNew = []
 let arr = []
 
@@ -55,14 +55,11 @@ bot.on('message',  msg => {
             setTimeout(checkAndSendNew, 10000)
         }
         const checkAndSendNew = () => {
-            if (arrOld[0] !== arrNew[0] && arrOld[1] !== arrNew[1] && arrOld[2] !== arrNew[2] && arrOld !== []) {
+            if (arrOld[0] !== arrNew[0] && arrOld[1] !== arrNew[1] && arrOld[2] !== arrNew[2]) {
                 bot.sendMessage(channelID,  '<b>' + arrNew[0].replace(/[\t]+/g,"") + '</b>' + arrNew[1].replace(/[\t]+/g,"") + arrNew[2].replace(/[\t]+/g,""), { parse_mode: "HTML" })
                 arrOld = []
                 arrOld = [arrNew[0],arrNew[1],arrNew[2]]
              setTimeout(parse1, 10000)
-            } else if (arrOld === []) {
-                arrOld = []
-                arrOld = [arrNew[0],arrNew[1],arrNew[2]]
             } else {
                 setTimeout(parse1, 10000)
             }
